@@ -1,0 +1,138 @@
+<%- include('./partials/header'); -%>
+<script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
+
+<div class="container mt-4">
+    <div class="border p-2" style="background:#f8f9fa;">
+       <strong><h4 class="p-2">Add new Ingredient</h4></strong> 
+    </div>
+    <form method="POST" action="/recepieingredients/new/<%=recepie._id%>"  class="mt-3">
+        <div class="form-group">
+            <label for="name">Ingredient</label>
+            <input autocomplete="off" type="text" class="form-control" id="name" name="name" placeholder="Enter Ingredient Name">
+            <div id="name1"></div>
+            <ul class="list-group d-none" id="ingredientList"> 
+                <li class="list-group-item text-right"><a href="" class="btn btn-danger" data-toggle="modal" data-target="#newIngredient">New Ingredient</a></li>
+            </ul>
+            
+        </div>
+        <div class="form-group">
+          <label for="qty">_id</label>
+          <input type="text" class="form-control" id="ingredientId" name="ingredient" placeholder="">
+      </div>
+      <div class="form-group">
+        <label for="qty">_id</label>
+        <input type="text" class="form-control" id="ingredientId" name="recepie" placeholder="" value="<%= recepie._id %>">
+    </div>
+        <div class="form-group">
+            <label for="qty">Quantity</label>
+            <input type="number" class="form-control" id="qty" name="qty" placeholder="">
+        </div>
+
+        <div class="form-group">
+            <label for="measure">Measure</label>
+            <input class="form-control basicAutoComplete" name="measure" type="text"  autocomplete="on">
+            
+            
+        </div>
+       
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+
+<div class="modal" id="newIngredient"  data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="newIngredient" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">New Ingredient</h5>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            
+            <form id="editForm">
+                <div class="form-group">
+                  <label for="">Ingredient Name</label>
+                  <input type="text" class="form-control" name="name" id="editName" aria-describedby="helpId" placeholder="">
+                  <small id="helpId" class="form-text text-muted">Enter the name of the Ingredient</small>
+                </div>
+                <div class="form-group" style="display:none">
+                  <label for="">Ingredient Id</label>
+                  <input type="text" class="form-control" name="id" id="editId" aria-describedby="helpId" placeholder="">
+                </div>
+                <button id="editSubmit"  class="btn btn-danger">Submit</button>
+            
+            </form>
+
+
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+
+<script>
+    $('.basicAutoComplete').autoComplete({
+    resolverSettings: {
+        url: '/ingredients/api/'
+    }, 
+    autoSelect: true, 
+    noResultsText: 'Not Found!!'
+    });
+
+    $("#name").on("keyup", function(event) {
+        var str = $('#name').val(); 
+        if(str.length > 2) 
+        {
+            $.ajax({
+            url: '/ingredients/api/'+str, 
+            type:'GET', 
+            success: function(result) {
+                console.log("success: " + JSON.stringify(result));
+                var list = '';  
+                for(var i in result)
+                {
+                    console.log(result[i].name);
+                    list = list + '<li class="list-group-item list-group-item-action" id="' + result[i]._id + '">' + result[i].name + '</li>' ; 
+            
+
+                }
+                
+                list = list + '<li class="list-group-item text-right"><a href="" class="btn btn-danger" data-toggle="modal" data-target="#newIngredient">New Ingredient</a></li>'
+                    $('#ingredientList').html(list); 
+                
+            }
+        })
+        };  
+    }); 
+
+    $("#name").on("focus", function() {
+        $('#ingredientList').removeClass('d-none'); 
+    });
+
+    $('body').on("click", '#ingredientList li', function(event){
+    console.log(event.target.innerText); 
+    $('#name').val(event.target.innerText); 
+    $('#ingredientId').val(event.target.id); 
+    $('#ingredientList').addClass('d-none'); 
+}); 
+    $("#name").on("focusout", function() {
+  //      $('#ingredientList').addClass('d-none'); 
+    });
+
+    $("#editSubmit").click(function(event){
+        event.preventDefault(); 
+        var name = $("#editName").val();
+        console.log('Posting:' + name); 
+        $.post("/ingredients", {name: name}, function(result){
+               alert("Response " + result); 
+              })
+                .fail(function() {
+                  console.log( "error" );
+                });
+        });
+
+
+</script>
+<%- include('./partials/footer'); -%>

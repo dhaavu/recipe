@@ -1,0 +1,80 @@
+<%- include('./partials/header'); -%>
+
+<div class="container" style="margin-top: 40px;" >
+       
+
+    <form id="editForm" method="POST" action="/recepies/">
+        <div class="form-group">
+          <label for="editName">Recepie Name</label>
+          <input required type="text" class="form-control" name="name" id="editName" aria-describedby="helpId" placeholder="" value="<%= recepie.name %>">
+          <div class="valid-feedback">
+            Recepie name is required !!
+          </div>
+        </div>
+      
+        <div class="form-group">
+          <label for="">Recepie Type</label>
+          <select required name="type" id="type" class="custom-select d-flex" multiple aria-label="multiple select example" aria-describedby="helpId">
+            <% var options = ['Breakfast', 'Entry', 'Smoothie', 'Salad', 'Desert'];  %>
+            <% for(var i = 0; i < options.length; i++){ %>
+
+                    <% if(recepie.type == options[i]) { %>
+                        <option value="<%= options[i] %>" selected > <%= options[i]%> </option>
+                   
+                   <% } else { %>
+                         <option value="<%= options[i]%>"  > <%= options[i]%> </option>
+    
+                  <% } %>
+                <% } %> 
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="">Procedure</label>
+          <textarea required class="form-control" name="procedure" id="procedure" rows="10"><%= recepie.procedure %></textarea>
+        </div>
+   
+        <div class="row justify-content-center">
+            <div class="col text-center">
+                <button type="submit" id="newSubmit"  class="btn btn-danger">Save</button>
+            </div>
+            <div class="col text-center">
+                <a href="" id="cancelSubmit"  class="btn btn-danger">Cancel</a>
+            </div>
+            
+        </div>
+    
+    </form>
+
+
+</div>
+
+<script>
+  tinymce.init({
+    selector: 'textarea',
+    plugins: 'a11ychecker advcode casechange formatpainter linkchecker autolink lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinymcespellchecker',
+    toolbar: 'a11ycheck addcomment showcomments casechange checklist code formatpainter pageembed permanentpen table',
+    toolbar_mode: 'floating',
+    tinycomments_mode: 'embedded',
+    tinycomments_author: 'Author name',
+  });
+
+  $("#cancelSubmit").click(function(event){
+    event.preventDefault(); 
+    window.history.back(); 
+  })
+ 
+  var frm = $("#editForm"); 
+
+  frm.submit(function(event){
+    if (frm.checkValidity() === false) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        frm.classList.add('was-validated');
+  })
+
+
+</script>
+
+
+<%- include('./partials/footer'); -%>

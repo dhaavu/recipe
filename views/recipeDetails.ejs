@@ -1,0 +1,165 @@
+<%- include('./partials/header'); -%>
+
+<!-- highlights section  -->
+
+<div class="container" style="margin-top: 40px;"> 
+  
+  <div class="row">
+    <div class="col-6">
+     <h4><%= recepie.name %></h4>  
+    </div>
+    <div class="col-6 text-right">
+      
+        <a href="/recepies/new" class="btn button btn-danger" >New 
+        </a>
+       <a href="#" class="btn button btn-danger" id="edit">Edit</a>
+       
+      
+   
+    </div>
+ </div>
+ 
+</div>
+
+<!-- Form Section  -->
+
+<div class="container" style="margin-top: 40px;" >
+       
+
+    <form id="editForm" method="POST" action="/recepies/<%= recepie._id %>">
+        <div class="form-group">
+          <label for="">Recepie Name</label>
+          <input readonly type="text" class="form-control" name="name" id="editName" aria-describedby="helpId" placeholder="" value="<%= recepie.name %>">
+        </div>
+      
+        <div class="form-group">
+          <label for="">Recepie Type</label>
+          <select readonly="true" disabled="true" name="type" id="type" class="custom-select" multiple="true" >
+            <% console.log(recepie.type[0]) %> 
+            <% var options = ['Breakfast', 'Entry', 'Smoothie', 'Salad', 'Desert'];  %>
+            
+                <% for(var i = 0; i < options.length; i++){ %>
+
+                        <% if(recepie.type.includes(options[i])) { %>
+                            <option value="<%= options[i] %>" selected > <%= options[i]%> </option>
+                      
+                      <% } else { %>
+                            <option value="<%= options[i]%>"  > <%= options[i]%> </option>
+        
+                      <% } %>
+                    <% } %> 
+               
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="">Procedure</label>
+          <textarea class="form-control" name="procedure" id="procedure" rows="10"><%= recepie.procedure %></textarea>
+        </div>
+        <div class="form-group" style="display:none">
+          <label for="">Recepie Id</label>
+          <input type="text" class="form-control" name="id" id="editId" aria-describedby="helpId" placeholder="">
+        </div>
+        <div class="row justify-content-center toggle" style="display:none">
+          <div class="col">
+            <button id="editSubmit"  class="btn btn-danger">Save</button>
+          </div>
+          <div class="col">
+            <a name="" id="cancel" class="btn btn-danger" href="" role="button">Cancel</a>
+          </div>
+        </div>
+        
+    </form>
+
+
+</div>
+
+<!-- related section  -->
+
+<div class="container" style="margin-top: 20px;">
+  <div class="row m-3">
+    <div class="col-6">
+      <label for="">Ingredients</label>
+    </div>
+    <div class="col-6 text-right">
+      <a href="/recepies/<%= recepie._id %>/newIngredient/" class="btn btn-danger">new</a>
+    </div>
+  </div>
+
+  
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Ingredients</th>
+        <th scope="col">Qty</th>
+        <th scope="col">Measure</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% console.log(recepie.ingredients) %> 
+     <% for(var i=0; i < recepie.ingredients.length; i++) { %>
+      <tr>
+        <th scope="row"><%= i %> </th>
+        <td><%= recepie.ingredients[i].name %></td>
+        <td><%= recepie.ingredients[i].qty %></td>
+        <td><%= recepie.ingredients[i].measure %></td>
+         <td> <i class="bi bi-pencil-square"></i></td>
+      </tr>
+     <% } %> 
+      
+    </tbody>
+  </table>
+
+</div>
+
+<script>
+  tinymce.init({
+    selector: 'textarea',
+    plugins: 'autolink lists media table',
+    toolbar: [
+    {
+      name: 'history', items: [ 'undo', 'redo' ]
+    },
+    {
+      name: 'styles', items: [ 'styleselect' ]
+    },
+    {
+      name: 'formatting', items: [ 'bold', 'italic']
+    },
+    {
+      name: 'alignment', items: [ 'alignleft', 'aligncenter', 'alignright', 'alignjustify' ]
+    },
+    {
+      name: 'indentation', items: [ 'outdent', 'indent' ]
+    }
+  ],
+    toolbar_mode: 'floating',
+    tinycomments_mode: 'embedded',
+    tinycomments_author: 'Author name',
+    readonly:0
+  });
+
+ 
+
+  $('#edit').click(function(event){
+    event.preventDefault(); 
+    $('#editForm input').prop('readonly', false); 
+    $('#editForm select').prop('disabled', false); 
+    $('.toggle').css('display', "flex"); 
+   // tinymce.activeEditor.mode.set("design"); 
+    
+  })
+
+  $('#cancel').click(function(event){
+  
+    window.location.reload(); 
+    // $('#editForm input').prop('readonly', true); 
+    // $('#editForm select').prop('disabled', true); 
+    // $('.toggle').css('display', "none"); 
+   // tinymce.activeEditor.mode.set("design"); 
+    
+  })
+</script>
+
+<%- include('./partials/footer'); -%>

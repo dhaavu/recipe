@@ -1,0 +1,120 @@
+<%- include('./partials/header'); -%>
+<div class="container above-header">
+    <div class="row justify-content-between">
+        <div class="col-sm-8">
+            <h3 class="text-center">Ingredients</h3>
+        </div>
+        <div class="col-sm-4 text-center">
+            <button type="button"  button-type="new" class="btn btn-danger" data-toggle="modal" data-target="#editIngredient">
+                New
+              </button>
+        </div>
+    </div>
+
+    
+    
+    <ul class="list-group above-header">
+
+        <% ingredients.forEach(function(ingredient){ %>
+            <li id="" class="list-group-item d-flex justify-content-between align-items-center"> <%= ingredient.name %> <div class"div"> <a class="editButton" button-type="edit" href="" data-bs-toggle="modal" data-bs-target="#editIngredient" data-value="<%= ingredient.name %>" data-id="<%= ingredient._id %>"><i class="fa fa-pencil"></i></a><a id="<%= ingredient._id %>" class="del" href=""><i class="fa fa-trash"></i></a></div>  </li> 
+            
+        <% }) %>
+        
+      </ul>  
+</div>
+
+
+
+  <div class="modal" id="editIngredient"  data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="newIngredient" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Edit Ingredient</h5>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            
+            <form id="editForm">
+                <div class="form-group">
+                  <label for="">Ingredient Name</label>
+                  <input type="text" class="form-control" name="name" id="editName" aria-describedby="helpId" placeholder="">
+                  <small id="helpId" class="form-text text-muted">Enter the name of the Ingredient</small>
+                </div>
+                <div class="form-group" style="display:none">
+                  <label for="">Ingredient Id</label>
+                  <input type="text" class="form-control" name="id" id="editId" aria-describedby="helpId" placeholder="">
+                </div>
+                <button id="editSubmit"  class="btn btn-danger">Submit</button>
+            
+            </form>
+
+
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function(){  
+   
+
+      $('.del').click(function(){
+        $.ajax({
+            url: '/ingredients/'+this.id, 
+            type:'DELETE', 
+            success: function(result) {
+                console.log("success"); 
+            }
+        }) 
+
+      }); 
+     /* $('.editButton').click(function(){
+        var value = $(this).parent().parent().text(); 
+        console.log(value); 
+        var nameInput = $('#name'); 
+        console.log(nameInput); 
+        document.getElementById('name').value = value;  
+      })*/
+
+      $('#editIngredient').on('show.bs.modal', function(e){
+       if ($(e.relatedTarget).attr('button-type')=='edit'){
+        var val = $(e.relatedTarget).attr('data-value'); 
+        var id = $(e.relatedTarget).attr('data-id');
+        $('#editIngredient #editName').val(val);  
+        $('#editIngredient #editId').val(id);
+       } 
+         
+      }); 
+
+      $("#editSubmit").click(function(){
+        var name = $("#editName").val();
+        var id= $('#editId').val(); 
+        if(id != undefined || id != ''){
+          $.post("/ingredients/" + id, {name: name}, function(result){
+            //   alert("Response " + result); 
+              })
+                .fail(function() {
+                  console.log( "error" );
+                });
+        }
+        else
+        {
+          console.log('Posting:' + name); 
+          $.post("/ingredients", {name: name}, function(result){
+               console.log("Response " + result); 
+              })
+                .fail(function() {
+                  console.log( "error" );
+                });
+        }
+        
+      });
+
+}); 
+</script>
+
+
+
+
+<%- include('./partials/footer'); -%>

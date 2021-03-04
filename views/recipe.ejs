@@ -1,0 +1,85 @@
+<%- include('./partials/header'); -%>
+<div class="container above-header">
+    <div class="row justify-content-between">
+        <div class="col-6">
+            <h3 class="">Recipes</h3>
+        </div>
+        <div class="col-4 text-right">
+            <a  href="/recipe/new"  class="btn btn-danger" >
+                New
+            </a>
+        </div>
+    </div>
+  
+    <div class="input-group search">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+        </svg></span>
+      </div>
+   
+      <input class="form-control " type="text" id="myInput" onkeyup="search()" placeholder="Search for recipes.." title="Type in a name">
+    </div>
+  
+   <ul class="list-group above-header" id="myUL">
+
+        <% recipe.forEach(function(recipe){ %>
+            <li id="" class="list-group-item d-flex justify-content-between align-items-center"> <a href="/recipe/<%= recipe.row_id %>"> <%= recipe.name %> </a> <div class"div"> <a class="editButton" button-type="edit" href="" data-bs-toggle="modal" data-bs-target="#editrecipe" data-value="<%= recipe.name %>" data-id="<%= recipe.row_id %>"><i class="fa fa-pencil"></i></a><a id="<%= recipe.row_id %>" class="del" href=""><i class="fa fa-trash"></i></a></div>  </li> 
+            
+        <% }) %>
+        
+      </ul>  
+</div>
+
+
+
+ 
+
+  <script>
+    $(document).ready(function(){  
+   
+      $('.del').click(function(){
+        $.ajax({
+            url: '/recipe/'+this.id, 
+            type:'DELETE', 
+            success: function(result) {
+                console.log("success"); 
+            }
+        }) 
+      }); 
+     
+
+    
+   
+
+      
+
+}); 
+
+function search() {
+    console.log("search function called!!")
+    var input, filter, ul, li, a, i, txtValue;
+    input = document.getElementById("myInput");
+    filter = input.value.toUpperCase();
+    ul = document.getElementById("myUL");
+    li = ul.getElementsByTagName("li");
+    console.log(li); 
+
+    for (i = 0; i < li.length; i++) {
+        a = li[i].getElementsByTagName("a")[0];
+        console.log(a.innerText); 
+        txtValue = a.textContent || a.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            $(li[i]).addClass("d-flex"); 
+            console.log("filter not working ")
+        } else {
+           $(li[i]).removeClass("d-flex").hide(); 
+        }
+    }
+}
+</script>
+
+
+
+
+<%- include('./partials/footer'); -%>
