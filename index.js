@@ -5,8 +5,16 @@ var recipeAPIRoutes = require('./routes/recipe');
 var ingredientAPIRoutes = require('./routes/ingredient');
 var recipeRoutes = require('./routes/ui/recipe'); 
 var ingredientRoutes = require('./routes/ui/ingredient'); 
+var cors = require('cors'); 
 var app = express();
 app.set('view engine', 'ejs');
+app.use(cors());
+
+app.use((req,res, next)=>{
+    res.header("Access-Control-Allow-Origin", "*"); 
+    res.header("Access-Control-Allow-Headers", "*"); 
+    next(); 
+})
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(methodOverride("_method"));

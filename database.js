@@ -2,7 +2,8 @@ create table receipe(
     row_id uuid PRIMARY KEY DEFAULT UUID_GENERATE_V4(), 
     name varchar(200), 
     type varchar(100), 
-    procedure text
+    procedure text, 
+    url text
 ); 
 
 create table ingredient(

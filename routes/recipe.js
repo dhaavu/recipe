@@ -24,18 +24,20 @@ client.query(queryStr, function(err, resp)  {
 
 router.get('/:id', function(req, res){
     var response = {}; 
-    queryString=   `select recipe.name, 
+    queryString=   `select recipe.name, recipe.row_id, recipe.url, recipe.procedure, 
     json_agg(json_build_object(
     'recipe_ingredient_id', recipe_ingredients.row_id , 
     'ingredient_id', ingredient_id,   
     'ingredient', ingredient.name, 
     'qty', recipe_ingredients.qty, 
     'measure', recipe_ingredients.measure)) ingredients 
-    from recipe, ingredient, recipe_ingredients where 
-    recipe.row_id::text = recipe_ingredients.recipe_id and 
-    ingredient.row_id::text = recipe_ingredients.ingredient_id and 
+    from recipe 
+    left outer join recipe_ingredients on 
+        (recipe.row_id::text  = recipe_ingredients.recipe_id)
+    left outer  join ingredient on 
+        (ingredient.row_id::text = recipe_ingredients.ingredient_id) where 
     recipe.row_id = $1
-    group by recipe.name`; 
+    group by recipe.name, recipe.row_id, recipe.url, recipe.procedure`; 
 
     client.query(queryString,[req.params.id],  function (err, resp) {
         if(err){
@@ -45,7 +47,7 @@ router.get('/:id', function(req, res){
         }
         else {
             response.msg = 'success'; 
-            response.recipe=resp.rows; 
+            response.recipe=resp.rows[0]; 
             res.send(response); 
         }
     })
