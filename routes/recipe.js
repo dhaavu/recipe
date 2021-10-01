@@ -1,6 +1,8 @@
 const express = require("express"); 
+
 var router = express.Router(); 
 var client = require('../databaseConnect'); 
+
 
 router.get('/', function(req, res){
 var response = {}; 
@@ -24,7 +26,7 @@ client.query(queryStr, function(err, resp)  {
 
 router.get('/:id', function(req, res){
     var response = {}; 
-    queryString=   `select recipe.name, recipe.row_id, recipe.url, recipe.procedure, 
+    queryString=   `select recipe.name, recipe.type, recipe.row_id, recipe.url, recipe.procedure, 
     json_agg(json_build_object(
     'recipe_ingredient_id', recipe_ingredients.row_id , 
     'ingredient_id', ingredient_id,   
@@ -37,7 +39,7 @@ router.get('/:id', function(req, res){
     left outer  join ingredient on 
         (ingredient.row_id::text = recipe_ingredients.ingredient_id) where 
     recipe.row_id = $1
-    group by recipe.name, recipe.row_id, recipe.url, recipe.procedure`; 
+    group by recipe.name,recipe.type,  recipe.row_id, recipe.url, recipe.procedure`; 
 
     client.query(queryString,[req.params.id],  function (err, resp) {
         if(err){
@@ -74,10 +76,12 @@ router.post('/new', function (req, res){
     })
 })
 
-router.post('/:id', function (req, res){
+router.post('/:id',  function (req, res){
     var response = {}; 
-    var queryString = `update recipe set name = $1, type=$2 , procedure=$3 where row_id = $4 returning row_id`; 
-    client.query(queryString, [req.body.name, req.body.type, req.body.procedure, req.params.id], function(err, result){
+    console.log("The Req is >>", req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id);
+    
+    var queryString = `update recipe set name = $1, type=$2 , url=$3,  procedure=$4 where row_id = $5 returning row_id`; 
+    client.query(queryString, [req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id], function(err, result){
         if(err){
             console.log('Error creating recipe: ' + err);
             response.msg = 'Error creating recipe: ' + err; 
