@@ -98,6 +98,7 @@ router.post('/:id',  function (req, res){
 
 router.delete('/:id', function (req, res){
     var response = {}; 
+    
     var queryString = `delete from recipe where row_id = $1 returning row_id`; 
     client.query(queryString, [req.params.id], function(err, result){
         if(err){
@@ -129,7 +130,7 @@ router.delete('/:id', function (req, res){
 router.post('/ingredient/new', function(req, res){
     var response = {}; 
 
-    var queryString = `insert into recipeingredients(recepe_id, ingredient_id, qty,measure) values ($1, $2, $3, $4)`; 
+    var queryString = `insert into recipe_ingredients(recipe_id, ingredient_id, qty,measure) values ($1, $2, $3, $4)`; 
     client.query(queryString, [req.body.recipe_id, req.body.ingredient_id, req.body.qty, req.body.measure], function(err, resp){ 
         if (err){ 
             console.log('error adding recipe ingredient: ' + err);
@@ -164,7 +165,7 @@ router.post('/ingredient/:id', function(req, res){
 
 router.delete('/ingredient/:id', function(req, res){
     var response = {}; 
-
+    console.log('inside delete ingredinets: ' + req.params.id); 
     var queryString = `delete from recipe_ingredients where row_id = $1`; 
     client.query(queryString, [req.params.id], function(err, resp){ 
         if (err){ 
@@ -175,6 +176,7 @@ router.delete('/ingredient/:id', function(req, res){
         else {
             response.msg = 'success'; 
             response.recipe_ingredient = resp.rows; 
+            console.log('Recipe ingredient deleted' + JSON.stringify(response)); 
             res.send(response); 
         }
     })
