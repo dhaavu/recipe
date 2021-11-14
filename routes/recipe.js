@@ -1,30 +1,37 @@
 const express = require("express"); 
 
 var router = express.Router(); 
-var client = require('../databaseConnect'); 
+var pool = require('../databaseConnect'); 
 
 
-router.get('/', function(req, res){
+router.get('/', async function(req, res){
 var response = {}; 
 var queryStr= `select * from recipe`; 
 //console.log(queryStr); 
-client.query(queryStr, function(err, resp)  {
-    if(err){
-        console.log('Error getting the recipes: ' + err); 
-        response.msg = 'Error getting the recipes: ' + err; 
-        res.send(response); 
-    }
-    else {
-        response.msg='success'; 
-        response.recipe = resp.rows; 
-        res.send(response);
-    }
-    
-})
+const client = await pool.connect(); 
+    try{
+        client.query(queryStr, function(err, resp)  {
+            if(err){
+                console.log('Error getting the recipes: ' + err); 
+                response.msg = 'Error getting the recipes: ' + err; 
+                res.send(response); 
+            }
+            else {
+                response.msg='success'; 
+                response.recipe = resp.rows; 
+                res.send(response);
+            }
+            
+        })
+}
+finally{
+    client.release()
+}
+
 })
 
 
-router.get('/:id', function(req, res){
+router.get('/:id', async function(req, res){
     var response = {}; 
     queryString=   `select recipe.name, recipe.type, recipe.row_id, recipe.url, recipe.procedure, 
     json_agg(json_build_object(
@@ -40,67 +47,90 @@ router.get('/:id', function(req, res){
         (ingredient.row_id::text = recipe_ingredients.ingredient_id) where 
     recipe.row_id = $1
     group by recipe.name,recipe.type,  recipe.row_id, recipe.url, recipe.procedure`; 
-
-    client.query(queryString,[req.params.id],  function (err, resp) {
-        if(err){
-            console.log("Error getting the recipe: " + err); 
-            response.msg = "Error getting the recipe: " + err; 
-            res.send(response); 
-        }
-        else {
-            response.msg = 'success'; 
-            response.recipe=resp.rows[0]; 
-            res.send(response); 
-        }
-    })
+    const client = await pool.connect(); 
+    try{
+        client.query(queryString,[req.params.id],  function (err, resp) {
+            if(err){
+                console.log("Error getting the recipe: " + err); 
+                response.msg = "Error getting the recipe: " + err; 
+                res.send(response); 
+            }
+            else {
+                response.msg = 'success'; 
+                response.recipe=resp.rows[0]; 
+                res.send(response); 
+            }
+        })
+    }
+    finally{
+        client.release(); 
+    }
+    
     }); 
 
-router.post('/new', function (req, res){
+router.post('/new', async function (req, res){
     var response = {}; 
 
     var queryString = `insert into recipe (name, type, procedure)
     values 
     ($1, $2, $3) RETURNING row_id`; 
-
-    client.query(queryString, [ req.body.name, req.body.type, req.body.procedure], function(err, result){
-        if(err){
-            console.log('Error creating recipe: ' + err); 
-            response.msg = 'Error creating recipe: ' + err; 
-            res.send(response); 
-        }
-        else {
-            response.msg='success';
-            response.recipe = result.rows;  
-            res.send(response);
-        }   
-    })
+    const client = await pool.connect(); 
+    try{
+        client.query(queryString, [ req.body.name, req.body.type, req.body.procedure], function(err, result){
+            if(err){
+                console.log('Error creating recipe: ' + err); 
+                response.msg = 'Error creating recipe: ' + err; 
+                res.send(response); 
+            }
+            else {
+                response.msg='success';
+                response.recipe = result.rows;  
+                res.send(response);
+            }   
+        })
+    }
+    finally{
+        client.release(); 
+    }
+  
 })
 
-router.post('/:id',  function (req, res){
+router.post('/:id',  async function (req, res){
     var response = {}; 
     console.log("The Req is >>", req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id);
     
     var queryString = `update recipe set name = $1, type=$2 , url=$3,  procedure=$4 where row_id = $5 returning row_id`; 
-    client.query(queryString, [req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id], function(err, result){
-        if(err){
-            console.log('Error creating recipe: ' + err);
-            response.msg = 'Error creating recipe: ' + err; 
-            res.send(response); 
-        }             
-        else {
-            response.msg="success"; 
-            response.recipe = result.rows; 
-            res.send(response);
-        }   
-    })
+    const client = await pool.connect(); 
+
+    try{
+        client.query(queryString, [req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id], function(err, result){
+            if(err){
+                console.log('Error creating recipe: ' + err);
+                response.msg = 'Error creating recipe: ' + err; 
+                res.send(response); 
+            }             
+            else {
+                response.msg="success"; 
+                response.recipe = result.rows; 
+                res.send(response);
+            }   
+        })
+    }
+    finally{
+        client.release(); 
+    }
+   
 
 }); 
 
-router.delete('/:id', function (req, res){
+router.delete('/:id', async function (req, res){
     var response = {}; 
     
     var queryString = `delete from recipe where row_id = $1 returning row_id`; 
-    client.query(queryString, [req.params.id], function(err, result){
+    const client = await pool.connect(); 
+
+    try{
+        client.query(queryString, [req.params.id], function(err, result){
         if(err){
             console.log('Error deleting recipe: ' + err); 
             response.msg = 'Error deleting recipe: ' + err; 
@@ -124,31 +154,46 @@ router.delete('/:id', function (req, res){
             res.send(result.rows);
         }   
     }); 
+}
+finally{
+    client.release(); 
+
+}
+    
 
 });
 
-router.post('/ingredient/new', function(req, res){
+router.post('/ingredient/new', async function(req, res){
     var response = {}; 
 
     var queryString = `insert into recipe_ingredients(recipe_id, ingredient_id, qty,measure) values ($1, $2, $3, $4)`; 
-    client.query(queryString, [req.body.recipe_id, req.body.ingredient_id, req.body.qty, req.body.measure], function(err, resp){ 
-        if (err){ 
-            console.log('error adding recipe ingredient: ' + err);
-            response.msg = 'error adding recipe ingredient: ' + err; 
-            res.send(response);  
-        }
-        else {
-            response.msg = 'success'; 
-            response.recipe_ingredient = resp.rows; 
-            res.send(response); 
-        }
-    })
+    const client = await pool.connect(); 
+    try{
+        client.query(queryString, [req.body.recipe_id, req.body.ingredient_id, req.body.qty, req.body.measure], function(err, resp){ 
+            if (err){ 
+                console.log('error adding recipe ingredient: ' + err);
+                response.msg = 'error adding recipe ingredient: ' + err; 
+                res.send(response);  
+            }
+            else {
+                response.msg = 'success'; 
+                response.recipe_ingredient = resp.rows; 
+                res.send(response); 
+            }
+        })
+    }
+    finally{
+        client.release(); 
+    }
+    
 })
 
-router.post('/ingredient/:id', function(req, res){
+router.post('/ingredient/:id', async function(req, res){
     var response = {}; 
 
     var queryString = `update recipe_ingredients set ingredent_id = $2 qty = $3, measure = $4 where row_id = $1`; 
+    const client = await pool.connect(); 
+    try{
     client.query(queryString, [req.params.id,req.body.ingredient_id, req.body.qty, req.body.measure], function(err, resp){ 
         if (err){ 
             console.log('error updating recipe ingredient: ' + err);
@@ -161,25 +206,35 @@ router.post('/ingredient/:id', function(req, res){
             res.send(response); 
         }
     })
+}finally{
+client.release(); 
+}
 }); 
 
-router.delete('/ingredient/:id', function(req, res){
+router.delete('/ingredient/:id', async function(req, res){
     var response = {}; 
     console.log('inside delete ingredinets: ' + req.params.id); 
     var queryString = `delete from recipe_ingredients where row_id = $1`; 
-    client.query(queryString, [req.params.id], function(err, resp){ 
-        if (err){ 
-            console.log('error deleting recipe ingredient: ' + err);
-            response.msg = 'error deleting recipe ingredient: ' + err; 
-            res.send(response);  
-        }
-        else {
-            response.msg = 'success'; 
-            response.recipe_ingredient = resp.rows; 
-            console.log('Recipe ingredient deleted' + JSON.stringify(response)); 
-            res.send(response); 
-        }
-    })
+    const client = await pool.connect(); 
+    try{
+        client.query(queryString, [req.params.id], function(err, resp){ 
+            if (err){ 
+                console.log('error deleting recipe ingredient: ' + err);
+                response.msg = 'error deleting recipe ingredient: ' + err; 
+                res.send(response);  
+            }
+            else {
+                response.msg = 'success'; 
+                response.recipe_ingredient = resp.rows; 
+                console.log('Recipe ingredient deleted' + JSON.stringify(response)); 
+                res.send(response); 
+            }
+        })
+    }
+    finally{
+        client.release(); 
+    }
+    
 })
 
 module.exports = router; 
