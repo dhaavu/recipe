@@ -6,7 +6,17 @@ var pool = require('../databaseConnect');
 
 router.get('/', async function(req, res){
 var response = {}; 
-var queryStr= `select * from recipe`; 
+var queryStr= `select recipe.row_id , recipe.name , recipe.type , recipe.procedure , recipe.url, 
+json_agg(json_build_object(
+'ingredientId', ingredient.row_id , 
+'recipeIngredientId' , recipe_ingredients.row_id , 
+'ingredientName', ingredient.name)) ingredients
+from recipe 
+left outer join recipe_ingredients on
+(recipe.row_id::text  = recipe_ingredients.recipe_id)
+left outer join ingredient on 
+(recipe_ingredients.ingredient_id = ingredient.row_id :: text) 
+group by recipe.row_id , recipe.name , recipe.type , recipe.procedure , recipe.url`; 
 //console.log(queryStr); 
 const client = await pool.connect(); 
     try{

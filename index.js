@@ -46,11 +46,23 @@ app.get('/', function(req, res){
 
 })
 
-app.get('/home/:id', middleware.verify, async function(req, res){
+app.get('/home/', async function(req, res){
     try{
-        var queryString = "Select * from recipe where row_id = $1"; 
+        var queryString = `select recipe.row_id , recipe.name , recipe.type , recipe.procedure , recipe.url, 
+        json_agg(json_build_object(
+		'ingredientId', ingredient.row_id , 
+		'recipeIngredientId' , recipe_ingredients.row_id , 
+        'ingredientName', ingredient.name)) ingredients
+        from recipe 
+        left outer join recipe_ingredients on
+        (recipe.row_id::text  = recipe_ingredients.recipe_id)
+        left outer join ingredient on 
+        (recipe_ingredients.ingredient_id = ingredient.row_id :: text) 
+        group by recipe.row_id , recipe.name , recipe.type , recipe.procedure , recipe.url` 
+        ; 
         
-    var params = [req.params.id]; 
+   // var params = [req.params.id]; 
+   var params = ""; 
      var queryResult = await query(queryString, params); 
     res.send(queryResult);
     }
