@@ -10,7 +10,7 @@ var queryStr= `select recipe.row_id , recipe.name , recipe.type , recipe.procedu
 json_agg(json_build_object(
 'ingredientId', ingredient.row_id , 
 'recipeIngredientId' , recipe_ingredients.row_id , 
-'ingredientName', ingredient.name)) ingredients
+'name', ingredient.name, 'qty', recipe_ingredients.qty, 'measure', recipe_ingredients.measure)) ingredients
 from recipe 
 left outer join recipe_ingredients on
 (recipe.row_id::text  = recipe_ingredients.recipe_id)
