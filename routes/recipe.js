@@ -6,7 +6,7 @@ var pool = require('../databaseConnect');
 
 router.get('/', async function(req, res){
 var response = {}; 
-var queryStr= `select recipe.row_id , recipe.name , recipe.type , recipe.procedure , recipe.url, 
+var queryStr= `select recipe.row_id , recipe.name , recipe.type , recipe.procedure , recipe.url, recipe.procedureData, 
 json_agg(json_build_object(
 'ingredientId', ingredient.row_id , 
 'recipeIngredientId' , recipe_ingredients.row_id , 
@@ -16,7 +16,7 @@ left outer join recipe_ingredients on
 (recipe.row_id::text  = recipe_ingredients.recipe_id)
 left outer join ingredient on 
 (recipe_ingredients.ingredient_id = ingredient.row_id :: text) 
-group by recipe.row_id , recipe.name , recipe.type , recipe.procedure , recipe.url`; 
+group by recipe.row_id , recipe.name , recipe.type , recipe.procedure , recipe.url, recipe.procedureData`; 
 //console.log(queryStr); 
 const client = await pool.connect(); 
     try{
@@ -43,7 +43,7 @@ finally{
 
 router.get('/:id', async function(req, res){
     var response = {}; 
-    queryString=   `select recipe.name, recipe.type, recipe.row_id, recipe.url, recipe.procedure, 
+    queryString=   `select recipe.name, recipe.type, recipe.row_id, recipe.url, recipe.procedure, recipe.procedureData, 
     json_agg(json_build_object(
     'recipe_ingredient_id', recipe_ingredients.row_id , 
     'ingredient_id', ingredient_id,   
@@ -56,7 +56,7 @@ router.get('/:id', async function(req, res){
     left outer  join ingredient on 
         (ingredient.row_id::text = recipe_ingredients.ingredient_id) where 
     recipe.row_id = $1
-    group by recipe.name,recipe.type,  recipe.row_id, recipe.url, recipe.procedure`; 
+    group by recipe.name,recipe.type,  recipe.row_id, recipe.url, recipe.procedure, recipe.procedureData`; 
     const client = await pool.connect(); 
     try{
         client.query(queryString,[req.params.id],  function (err, resp) {
@@ -81,12 +81,12 @@ router.get('/:id', async function(req, res){
 router.post('/new', async function (req, res){
     var response = {}; 
 
-    var queryString = `insert into recipe (name, type, procedure)
+    var queryString = `insert into recipe (name, type, procedure, url, procedureData)
     values 
-    ($1, $2, $3) RETURNING row_id`; 
+    ($1, $2, $3, $4, $5) RETURNING row_id`; 
     const client = await pool.connect(); 
     try{
-        client.query(queryString, [ req.body.name, req.body.type, req.body.procedure], function(err, result){
+        client.query(queryString, [ req.body.name, req.body.type, req.body.procedure, req.body.url, req.body.procedureData], function(err, result){
             if(err){
                 console.log('Error creating recipe: ' + err); 
                 response.msg = 'Error creating recipe: ' + err; 
@@ -109,11 +109,11 @@ router.post('/:id',  async function (req, res){
     var response = {}; 
     console.log("The Req is >>", req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id);
     
-    var queryString = `update recipe set name = $1, type=$2 , url=$3,  procedure=$4 where row_id = $5 returning row_id`; 
+    var queryString = `update recipe set name = $1, type=$2 , url=$3,  procedure=$4 , procedureData=$6 where row_id = $5 returning row_id`; 
     const client = await pool.connect(); 
 
     try{
-        client.query(queryString, [req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id], function(err, result){
+        client.query(queryString, [req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id, req.params.procedureData], function(err, result){
             if(err){
                 console.log('Error creating recipe: ' + err);
                 response.msg = 'Error creating recipe: ' + err; 
