@@ -113,7 +113,7 @@ router.post('/:id',  async function (req, res){
     const client = await pool.connect(); 
 
     try{
-        client.query(queryString, [req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id, req.params.procedureData], function(err, result){
+        client.query(queryString, [req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id, req.body.procedureData], function(err, result){
             if(err){
                 console.log('Error creating recipe: ' + err);
                 response.msg = 'Error creating recipe: ' + err; 
