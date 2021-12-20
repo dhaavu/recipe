@@ -107,7 +107,7 @@ router.post('/new', async function (req, res){
 
 router.post('/:id',  async function (req, res){
     var response = {}; 
-    console.log("The Req is >>", req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id);
+    console.log("The Req is >>", req.body.name, req.body.type, req.body.url,  req.body.procedure, req.params.id, rec.body.procedureData);
     
     var queryString = `update recipe set name = $1, type=$2 , url=$3,  procedure=$4 , procedureData=$6 where row_id = $5 returning row_id`; 
     const client = await pool.connect(); 
