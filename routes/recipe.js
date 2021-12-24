@@ -176,7 +176,7 @@ finally{
 router.post('/ingredient/new', async function(req, res){
     var response = {}; 
 
-    var queryString = `insert into recipe_ingredients(recipe_id, ingredient_id, qty,measure) values ($1, $2, $3, $4)`; 
+    var queryString = `insert into recipe_ingredients(recipe_id, ingredient_id, qty,measure) values ($1, $2, $3, $4) RETURNING row_id`; 
     const client = await pool.connect(); 
     try{
         client.query(queryString, [req.body.recipe_id, req.body.ingredient_id, req.body.qty, req.body.measure], function(err, resp){ 
@@ -186,7 +186,9 @@ router.post('/ingredient/new', async function(req, res){
                 res.send(response);  
             }
             else {
-                response.msg = 'success'; 
+                response.msg = 'success';
+                console.log('Ingredient inserted...') 
+                console.log(resp); 
                 response.recipe_ingredient = resp.rows; 
                 res.send(response); 
             }
