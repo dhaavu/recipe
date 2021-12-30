@@ -140,31 +140,50 @@ router.delete('/:id', async function (req, res){
     const client = await pool.connect(); 
 
     try{
-        client.query(queryString, [req.params.id], function(err, result){
-        if(err){
-            console.log('Error deleting recipe: ' + err); 
-            response.msg = 'Error deleting recipe: ' + err; 
-            res.send(response); 
+        var deleteRecipe = await client.query(queryString, [req.params.id]); 
+        queryString = 'delete from recipe_ingredients where recipe_id = $1'
+        var deleteRecipeIngredients = await client.query(queryString, [req.params.id]); 
+        console.log(deleteRecipe); 
+        console.log(deleteRecipeIngredients)
+        var response = { 
+            msg: "success", 
+            row_id: deleteRecipe.rows[0].row_id, 
         }
-        else {
-            queryString = `delete from recipe_ingredients where recipe_id = $1`; 
-            client.query(queryString, [req.params.id], function (error, resp){
-                if(error){
-                    console.log("error deleting the recipe ingredients: " + error); 
-                    response.msg = "error deleting the recipe ingredients: " + error; 
-                    res.send(response); 
-                }
-                else { 
-                    response.msg = 'success'; 
-                    response.recipe = result.rows; 
-                    response.recipe_ingredients = res.rows; 
-                    res.send(response); 
-                }
-            }) 
-            res.send(result.rows);
-        }   
-    }); 
-}
+        res.send(response); 
+    }
+    catch(err){
+        var response = {
+            msg: "error", 
+            error:"Error Deleting the recipe / recipe Ingredients - "  + err
+        }
+        res.send(response); 
+    }
+//     try{
+//         client.query(queryString, [req.params.id], function(err, result){
+//         if(err){
+//             console.log('Error deleting recipe: ' + err); 
+//             response.msg = 'Error deleting recipe: ' + err; 
+//             res.send(response); 
+//         }
+//         else {
+//             queryString = `delete from recipe_ingredients where recipe_id = $1`; 
+//             client.query(queryString, [req.params.id], function (error, resp){
+//                 if(error){
+//                     console.log("error deleting the recipe ingredients: " + error); 
+//                     response.msg = "error deleting the recipe ingredients: " + error; 
+//                     res.send(response); 
+//                 }
+//                 else { 
+//                     response.msg = 'success'; 
+//                     response.recipe = result.rows; 
+//                     response.recipe_ingredients = res.rows; 
+//                     res.send(response); 
+//                 }
+//             }) 
+//             res.send(result.rows);
+//         }   
+//     }); 
+// }
 finally{
     client.release(); 
 
