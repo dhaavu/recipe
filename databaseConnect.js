@@ -9,8 +9,9 @@ const { Pool, Client } = require('pg')
 //   });
 
   const pool = new Pool({
-    connectionString: 'postgres://lovxfdpqyjvyry:5eced6719f4671aeec98218c39ad824cbd6143b7139ddbdba274baf807f6f825@ec2-52-205-3-3.compute-1.amazonaws.com:5432/dbtrmbvqej4gro',
-    ssl: {
+   // connectionString: 'postgres://lovxfdpqyjvyry:5eced6719f4671aeec98218c39ad824cbd6143b7139ddbdba274baf807f6f825@ec2-52-205-3-3.compute-1.amazonaws.com:5432/dbtrmbvqej4gro',
+   connectionString: 'postgresql://dhaavu:v2_3xMs2_imZuXVeQy5B2f42WEgDEN6r@db.bit.io/dhaavu/recipe',  
+   ssl: {
       rejectUnauthorized: false
     }, 
     idle_in_transaction_session_timeout:100
